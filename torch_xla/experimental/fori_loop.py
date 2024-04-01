@@ -34,7 +34,60 @@ def while_loop(cond_fn, body_fn, loop_carry):
   return _xla_while_loop(cond_fn, body_fn, init, limit_value)
 
 
-def _xla_while_loop(cond_fn, body_fn, *operands):
+import numpy as np
+import torch
+import torch_xla
+import torch_xla.core.xla_builder as xb
+import torch_xla.core.xla_model as xm
+import torch_xla.utils.utils as xu
+import torch_xla.core.xla_op_registry as xor
+
+from torch._C import DispatchKey
+from torch._ops import HigherOrderOperator
+import torch._higher_order_ops.while_loop
+from torch._higher_order_ops.while_loop import while_loop_op
+
+
+def fori_loop(lower, upper, body_fun, one_value, init_val):
+
+  device = xm.xla_device()
+
+  def cond_fn(upper, lower, x):
+    return lower[0] < upper[0]
+
+  def body_fn(upper, lower, x):
+    one_value = torch.ones(1, dtype=torch.int32, device=device)
+    return (torch.sub(upper, one_value), lower, body_fun(one_value, x))
+
+  def old_cond_fn(one_value, lower, upper, init_val):
+    lower_compare = torch.add(lower, one_value)
+    return lower_compare[0] <= upper[0]
+
+  def old_body_fn(one_value, lower, upper, init_val):
+    new_lower = torch.add(lower, one_value)
+    new_init_val = body_fun(init_val, one_value)
+    return (one_value, new_lower, upper, new_init_val)
+
+  res = _xla_while_loop(cond_fn, body_fn, lower, upper, init_val)
+  return res
+
+
+@while_loop_op.py_impl(DispatchKey.XLA)
+def while_loop(cond_fn, body_fn, loop_carry):
+  # TODO(@manfei): PyTorch require operands to be list/tuple, PyTorch/XLA _xla_while_loop only accept *operands, *operands would tuple items again: (a, '')
+  init, limit_value = loop_carry
+  return _xla_while_loop(cond_fn, body_fn, init, limit_value)
+
+
+def _xla_while_loop(cond_fn, body_fn, *original_operands):
+  # fake operands to split formal code
+  operands = []
+  for original_operand in original_operands:
+    device = original_operand.device
+    #TODO(@manfei) type = original_operand.type
+    operands.append(torch.randint(10, original_operand.size(), dtype=torch.int32).to(device))
+  operands = tuple(operands)
+
   kwargs = {}
   if type(operands) is tuple:
     shapes = xb.tensor_shape(operands)
@@ -75,6 +128,6 @@ def _xla_while_loop(cond_fn, body_fn, *operands):
 
   # gain final result with generated while xlacomputation
   result = torch_xla._XLAC._xla_user_computation('xla::_op_test_while',
-                                                 (operands), computation)
+                                                 (original_operands), computation)
 
   return result
