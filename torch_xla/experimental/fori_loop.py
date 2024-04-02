@@ -23,15 +23,17 @@ def fori_loop(lower, upper, body_fun, one_value, init_val):
     one_value = torch.ones(1, dtype=torch.int32, device=device)
     return (torch.sub(upper, one_value), lower, body_fun(one_value, x))
 
-  res = _xla_while_loop(cond_fn, body_fn, lower, upper, init_val)
+  res = while_loop(cond_fn, body_fn, lower, upper, init_val)
+  # res = _xla_while_loop(cond_fn, body_fn, lower, upper, init_val)
   return res
 
 
 @while_loop_op.py_impl(DispatchKey.XLA)
-def while_loop(cond_fn, body_fn, loop_carry):
+def while_loop(cond_fn, body_fn, *loop_carry):
   # TODO(@manfei): PyTorch require operands to be list/tuple, PyTorch/XLA _xla_while_loop only accept *operands, *operands would tuple items again: (a, '')
-  init, limit_value = loop_carry
-  return _xla_while_loop(cond_fn, body_fn, init, limit_value)
+  # init, limit_value = loop_carry
+  # return _xla_while_loop(cond_fn, body_fn, init, limit_value)
+  return _xla_while_loop(cond_fn, body_fn, loop_carry) # init, limit_value)
 
 
 def _xla_while_loop(cond_fn, body_fn, *original_operands):
@@ -45,6 +47,7 @@ def _xla_while_loop(cond_fn, body_fn, *original_operands):
                       dtype=torch.int32).to(device))
   operands = tuple(operands)
 
+  # trans operadns from list(tensor) to list(xla::op)
   kwargs = {}
   if type(operands) is tuple:
     shapes = xb.tensor_shape(operands)
