@@ -12,18 +12,20 @@ import torch._higher_order_ops.while_loop
 from torch._higher_order_ops.while_loop import while_loop_op
 
 
-def fori_loop(lower, upper, body_fun, one_value, init_val):
+# TODO(@manfei): delete one_value?
+def fori_loop(lower, upper, body_fun, one_value, init_val, input_value):
 
   device = xm.xla_device()
 
-  def cond_fn(upper, lower, x):
+  def cond_fn(upper, lower, x, input_value):
     return lower[0] < upper[0]
 
-  def body_fn(upper, lower, x):
+  # one_value, init_val, l_in_i
+  def body_fn(upper, lower, x, input_value):
     one_value = torch.ones(1, dtype=torch.int32, device=device)
-    return (torch.sub(upper, one_value), lower, body_fun(one_value, x))
+    return (torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value))
 
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val))
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, input_value))
   return res
 
 
