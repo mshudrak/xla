@@ -34,7 +34,7 @@ def while_loop(cond_fn, body_fn, *loop_carry):
   # init, limit_value = loop_carry
   # return _xla_while_loop(cond_fn, body_fn, init, limit_value)
   print("loop_carry: ", loop_carry)
-  return _xla_while_loop(cond_fn, body_fn, loop_carry) # init, limit_value)
+  return _xla_while_loop(cond_fn, body_fn, *loop_carry) # init, limit_value)
 
 
 def _xla_while_loop(cond_fn, body_fn, *original_operands):
