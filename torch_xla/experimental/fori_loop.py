@@ -40,7 +40,9 @@ def _xla_while_loop(cond_fn, body_fn, *original_operands):
   for original_operand in original_operands:
     device = original_operand.device
     #TODO(@manfei) type = original_operand.type
-    operands.append(torch.randint(10, original_operand.size(), dtype=torch.int32).to(device))
+    operands.append(
+        torch.randint(10, original_operand.size(),
+                      dtype=torch.int32).to(device))
   operands = tuple(operands)
 
   kwargs = {}
@@ -83,6 +85,7 @@ def _xla_while_loop(cond_fn, body_fn, *original_operands):
 
   # gain final result with generated while xlacomputation
   result = torch_xla._XLAC._xla_user_computation('xla::_op_test_while',
-                                                 (original_operands), computation)
+                                                 (original_operands),
+                                                 computation)
 
   return result
