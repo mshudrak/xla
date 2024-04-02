@@ -23,7 +23,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val):
     one_value = torch.ones(1, dtype=torch.int32, device=device)
     return (torch.sub(upper, one_value), lower, body_fun(one_value, x))
 
-  res = while_loop(cond_fn, body_fn, lower, upper, init_val)
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val))
   # res = _xla_while_loop(cond_fn, body_fn, lower, upper, init_val)
   return res
 
