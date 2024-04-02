@@ -36,7 +36,7 @@ def while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=None):
   print("000 additional_inputs: ", additional_inputs)
   if additional_inputs is None:
     additional_inputs = tuple()
-  return _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs)
+  return _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=additional_inputs)
 
 
 def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
