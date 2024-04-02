@@ -33,6 +33,7 @@ def while_loop(cond_fn, body_fn, loop_carry):
   # TODO(@manfei): PyTorch require operands to be list/tuple, PyTorch/XLA _xla_while_loop only accept *operands, *operands would tuple items again: (a, '')
   # init, limit_value = loop_carry
   # return _xla_while_loop(cond_fn, body_fn, init, limit_value)
+  print("loop_carry: ", loop_carry)
   return _xla_while_loop(cond_fn, body_fn, loop_carry) # init, limit_value)
 
 
