@@ -37,6 +37,7 @@ def while_loop(cond_fn, body_fn, *loop_carry):
 
 
 def _xla_while_loop(cond_fn, body_fn, *original_operands):
+  print("original_operands: ", original_operands)
   # fake operands to split formal code
   operands = []
   for original_operand in original_operands:
