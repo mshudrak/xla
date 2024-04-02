@@ -13,7 +13,7 @@ from torch._higher_order_ops.while_loop import while_loop_op
 
 
 # TODO(@manfei): delete one_value?
-def fori_loop(lower, upper, body_fun, one_value, init_val, input_value):
+def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
 
   device = xm.xla_device()
 
@@ -21,13 +21,13 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, input_value):
     return lower[0] < upper[0]
 
   # one_value, init_val, l_in_i
-  def body_fn(upper, lower, x, input_value):
+  def body_fn(upper, lower, x, *input_value):
     one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
-    result = body_fun(one_value, *x)
+    result = body_fun(one_value, x, *input_value)
     if type(result) is tuple:
-      return_list = list(body_fun(one_value, *x))
+      return_list = list(body_fun(one_value, x, *input_value))
       return_list.insert(0, lower)
       return_list.insert(0, torch.sub(upper, one_value))
       weight = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
@@ -41,7 +41,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, input_value):
     # return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     return return_list
 
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, input_value))
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value))
   return res
 
 
