@@ -28,22 +28,25 @@ def fori_loop(lower, upper, body_fun, one_value, init_val):
 
 
 @while_loop_op.py_impl(DispatchKey.XLA)
-def while_loop(cond_fn, body_fn, *loop_carry):
+def while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=None):
   # TODO(@manfei): PyTorch require operands to be list/tuple, PyTorch/XLA _xla_while_loop only accept *operands, *operands would tuple items again: (a, '')
-  # init, limit_value = loop_carry
-  return _xla_while_loop(cond_fn, body_fn, *loop_carry)
+  # cond_fn&body_fn: callable
+  # carried_inputs: (Tuple of possibly nested dict/list/tuple of tensors)
+  if additional_inputs is None:
+    additional_inputs = tuple()
+  return _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs)
 
 
-def _xla_while_loop(cond_fn, body_fn, *original_operands):
-  # untuple original_operands from while_loop
-  original_operands = original_operands[0]
+def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
+  # untuple carried_inputs from while_loop
+  carried_inputs = carried_inputs[0]
   # fake operands to split formal code
   operands = []
-  for original_operand in original_operands:
-    device = original_operand.device
-    #TODO(@manfei) type = original_operand.type
+  for carried_input in carried_inputs:
+    device = carried_input.device
+    #TODO(@manfei) type = carried_input.type
     operands.append(
-        torch.randint(10, original_operand.size(),
+        torch.randint(10, carried_input.size(),
                       dtype=torch.int32).to(device))
   operands = tuple(operands)
 
