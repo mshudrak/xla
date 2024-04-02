@@ -50,7 +50,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
                       dtype=torch.int32).to(device))
   fake_carried_inputs = tuple(fake_carried_inputs)
 
-  # trans operadns from list(tensor) to list(xla::op)
+  # trans fake_carried_inputs from list(tensor) to list(xla::op)
   kwargs = {}
   if type(fake_carried_inputs) is tuple:
     shapes = xb.tensor_shape(fake_carried_inputs)
