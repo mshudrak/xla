@@ -24,7 +24,6 @@ def fori_loop(lower, upper, body_fun, one_value, init_val):
     return (torch.sub(upper, one_value), lower, body_fun(one_value, x))
 
   res = while_loop(cond_fn, body_fn, (lower, upper, init_val))
-  # res = _xla_while_loop(cond_fn, body_fn, lower, upper, init_val)
   return res
 
 
@@ -32,13 +31,10 @@ def fori_loop(lower, upper, body_fun, one_value, init_val):
 def while_loop(cond_fn, body_fn, *loop_carry):
   # TODO(@manfei): PyTorch require operands to be list/tuple, PyTorch/XLA _xla_while_loop only accept *operands, *operands would tuple items again: (a, '')
   # init, limit_value = loop_carry
-  # return _xla_while_loop(cond_fn, body_fn, init, limit_value)
-  print("loop_carry: ", loop_carry)
-  return _xla_while_loop(cond_fn, body_fn, *loop_carry) # init, limit_value)
+  return _xla_while_loop(cond_fn, body_fn, *loop_carry)
 
 
 def _xla_while_loop(cond_fn, body_fn, *original_operands):
-  print("original_operands: ", original_operands)
   # untuple original_operands from while_loop
   original_operands = original_operands[0]
   # fake operands to split formal code
