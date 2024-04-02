@@ -44,7 +44,6 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
   print("additional_inputs: ", additional_inputs)
   # untuple carried_inputs from while_loop
   carried_inputs = carried_inputs[0]
-  additional_inputs = carried_inputs[-1]
   # fake operands to split formal code
   operands = []
   for carried_input in carried_inputs:
@@ -96,7 +95,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
 
   # gain final result with generated while xlacomputation
   result = torch_xla._XLAC._xla_user_computation('xla::_op_test_while',
-                                                 (original_operands),
+                                                 (carried_inputs),
                                                  computation)
 
   return result
