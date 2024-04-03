@@ -81,7 +81,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
     #TODO(@manfei) type = carried_input.type
     fake_carried_inputs.append(
         torch.randint(10, carried_input.size(),
-                      dtype=int32).to(device))
+                      dtype=torch.int32).to(device))
   fake_carried_inputs = tuple(fake_carried_inputs)
   print("fake_carried_inputs: ", fake_carried_inputs)
   print("additional_inputs: ", additional_inputs)
