@@ -17,9 +17,9 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
 
   device = xm.xla_device()
 
-  a = torch.tensor(1, dtype=torch.int32, device=device)
-  b = torch.tensor(1, dtype=torch.int32, device=device)
-  c = torch.tensor(1, dtype=torch.int32, device=device)
+  # a = torch.tensor(1, dtype=torch.int32, device=device)
+  # b = torch.tensor(1, dtype=torch.int32, device=device)
+  # c = torch.tensor(1, dtype=torch.int32, device=device)
 
   def cond_fn(upper, lower, x, *input_value, a, b, c):
     return lower[0] < upper[0]
@@ -52,10 +52,10 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     # return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     return return_list
 
-  # a = torch.tensor(1, dtype=torch.int32, device=device)
-  # b = torch.tensor(1, dtype=torch.int32, device=device)
-  # c = torch.tensor(1, dtype=torch.int32, device=device)
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, a, b, c), )
+  a = torch.tensor(1, dtype=torch.int32, device=device)
+  b = torch.tensor(1, dtype=torch.int32, device=device)
+  c = torch.tensor(1, dtype=torch.int32, device=device)
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), (a, b, c))
   return res
 
 
@@ -97,7 +97,8 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
     params.append(p)
 
   # generate cond_fn xlacomputation
-  cond_result = cond_fn(*fake_carried_inputs)
+  cond_result = cond_fn(*fake_carried_inputs, a=additional_inputs[0],
+                        b=additional_inputs[1], c=additional_inputs[2])
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
   additional_inputs_list = list(fake_carried_inputs[2:])
@@ -112,7 +113,8 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
   print(cond_hlo_print)
 
   # generate body_fn xlacomputation
-  body_result = body_fn(*fake_carried_inputs)
+  body_result = body_fn(*fake_carried_inputs, a=additional_inputs[0],
+                        b=additional_inputs[1], c=additional_inputs[2])
   body_ctx = torch_xla._XLAC.lowering.LoweringContext()
   body_ctx.set_name_string("bodyctx")
   body_ctx.buildforiloop(list(body_result), [])
