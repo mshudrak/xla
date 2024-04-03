@@ -17,11 +17,15 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
 
   device = xm.xla_device()
 
-  def cond_fn(upper, lower, x, *input_value):
+  a = torch.tensor(1, dtype=torch.int32, device=device)
+  b = torch.tensor(1, dtype=torch.int32, device=device)
+  c = torch.tensor(1, dtype=torch.int32, device=device)
+
+  def cond_fn(upper, lower, x, *input_value, a, b, c):
     return lower[0] < upper[0]
 
   # one_value, init_val, l_in_i
-  def body_fn(upper, lower, x, *input_value):
+  def body_fn(upper, lower, x, *input_value, a, b, c):
     # one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
@@ -48,10 +52,10 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     # return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     return return_list
 
-  a = torch.tensor(1, dtype=torch.int32, device=device)
-  b = torch.tensor(1, dtype=torch.int32, device=device)
-  c = torch.tensor(1, dtype=torch.int32, device=device)
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), (a, b, c))
+  # a = torch.tensor(1, dtype=torch.int32, device=device)
+  # b = torch.tensor(1, dtype=torch.int32, device=device)
+  # c = torch.tensor(1, dtype=torch.int32, device=device)
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, a, b, c), )
   return res
 
 
