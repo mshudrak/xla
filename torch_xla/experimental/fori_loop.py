@@ -55,7 +55,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   a = torch.tensor(1, dtype=torch.int32, device=device)
   b = torch.tensor(1, dtype=torch.int32, device=device)
   c = torch.tensor(1, dtype=torch.int32, device=device)
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), (a, b, c))
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), [a, b, c])
   return res
 
 
@@ -83,6 +83,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
                       dtype=torch.int32).to(device))
   fake_carried_inputs = tuple(fake_carried_inputs)
   print("fake_carried_inputs: ", fake_carried_inputs)
+  print("additional_inputs: ", additional_inputs)
 
   # trans fake_carried_inputs from list(tensor) to list(xla::op)
   kwargs = {}
