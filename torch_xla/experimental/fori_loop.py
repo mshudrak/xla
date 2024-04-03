@@ -70,6 +70,7 @@ def while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=None):
 
 
 def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
+  print("carried_inputs: ", carried_inputs)
   # untuple carried_inputs from while_loop
   carried_inputs = carried_inputs[0]
   # fake carried_inputs to split formal code
