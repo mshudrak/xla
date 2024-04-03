@@ -22,7 +22,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
 
   # one_value, init_val, l_in_i
   def body_fn(upper, lower, x, *input_value):
-    one_value = torch.ones(1, dtype=torch.int32, device=device)
+    # one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
     result = body_fun(one_value, x, *input_value)
