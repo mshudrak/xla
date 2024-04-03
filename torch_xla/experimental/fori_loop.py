@@ -96,6 +96,16 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
   for shape in shapes:
     p = xb.mkparam(builder, len(params), shape)
     params.append(p)
+  # add additional_inputs for init of xla::while
+  if type(additional_inputs) is tuple:
+    additional_shapes = xb.tensor_shape(additional_inputs)
+  else:
+    additional_shapes = xb.tensor_shape((additional_inputs))
+  # builder = xb.create_builder('test_while')
+  # params = []
+  for additional_shape in additional_shapes:
+    p = xb.mkparam(builder, len(params), additional_shape)
+    params.append(p)
 
   # generate cond_fn xlacomputation
   cond_result = cond_fn(*fake_carried_inputs, a=additional_inputs[0],
