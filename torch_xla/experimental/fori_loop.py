@@ -17,7 +17,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
 
   device = xm.xla_device()
 
-  def cond_fn(upper, lower, x, input_value):
+  def cond_fn(upper, lower, x, *input_value):
     return lower[0] < upper[0]
 
   # one_value, init_val, l_in_i
