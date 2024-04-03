@@ -56,21 +56,21 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   a = torch.ones(1, dtype=torch.int32, device=device) # s32[1]
   b = torch.ones(20, dtype=torch.float32, device=device) # f32[20]
   c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), additional_inputs=(a, b, c))
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, a, b, c)) # , additional_inputs=(a, b, c))
   return res
 
 
 @while_loop_op.py_impl(DispatchKey.XLA)
-def while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=None):
+def while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=None): # a=None, b=None, c=None, 
   # TODO(@manfei): PyTorch require carried_inputs to be list/tuple, PyTorch/XLA _xla_while_loop only accept *operands, *operands would tuple items again: (a, '')
   # cond_fn&body_fn: callable
   # carried_inputs: (Tuple of possibly nested dict/list/tuple of tensors)
   if additional_inputs is None:
     additional_inputs = tuple()
-  return _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=additional_inputs)
+  return _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs=additional_inputs) #  a=a, b=b, c=c,
 
 
-def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
+def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, b, c, 
   print("carried_inputs: ", carried_inputs)
   # untuple carried_inputs from while_loop
   carried_inputs = carried_inputs[0]
@@ -98,18 +98,22 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
     p = xb.mkparam(builder, len(params), shape)
     params.append(p)
   # add additional_inputs for init of xla::while
-  if type(additional_inputs) is tuple:
-    additional_shapes = xb.tensor_shape(additional_inputs)
-  else:
-    additional_shapes = xb.tensor_shape((additional_inputs))
+  # if type(additional_inputs) is tuple:
+  #   additional_shapes = xb.tensor_shape(additional_inputs)
+  # else:
+  #   additional_shapes = xb.tensor_shape((additional_inputs))
   
-  for additional_shape in additional_shapes:
-    p = xb.mkparam(builder, len(params), additional_shape)
-    params.insert(-1, p) # keep the last item is s32[10]
+  # for additional_shape in additional_shapes:
+  #   p = xb.mkparam(builder, len(params), additional_shape)
+  #   params.append(p)
+
+  # keep the last item is s32[10]
+  # init     (s32[1], s32[1], s32[1], s32[10], s32[1], /*index=5*/f32[20], f32[20,10])
+  # expected (s32[1], s32[1], s32[1], s32[1], f32[20], /*index=5*/f32[20,10], s32[10])
+
 
   # generate cond_fn xlacomputation
-  cond_result = cond_fn(*fake_carried_inputs, a=additional_inputs[0],
-                        b=additional_inputs[1], c=additional_inputs[2])
+  cond_result = cond_fn(*fake_carried_inputs) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
   additional_inputs_list = list(fake_carried_inputs[2:])
@@ -124,8 +128,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
   print(cond_hlo_print)
 
   # generate body_fn xlacomputation
-  body_result = body_fn(*fake_carried_inputs, a=additional_inputs[0],
-                        b=additional_inputs[1], c=additional_inputs[2])
+  body_result = body_fn(*fake_carried_inputs) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
   body_ctx = torch_xla._XLAC.lowering.LoweringContext()
   body_ctx.set_name_string("bodyctx")
   body_ctx.buildforiloop(list(body_result), [])
@@ -150,7 +153,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
 
   # gain final result with generated while xlacomputation
   result = torch_xla._XLAC._xla_user_computation('xla::_op_test_while',
-                                                 (carried_inputs),
+                                                 (carried_inputs), # , a, b, c
                                                  computation)
 
   return result
