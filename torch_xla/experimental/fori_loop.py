@@ -52,9 +52,10 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     # return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     return return_list
 
-  a = torch.ones(1, dtype=torch.int32, device=device)
-  b = torch.ones(1, dtype=torch.int32, device=device)
-  c = torch.ones(1, dtype=torch.int32, device=device)
+  # s32[1], f32[20], /*index=5*/f32[20,10],
+  a = torch.ones(1, dtype=torch.int32, device=device) # s32[1]
+  b = torch.ones(20, dtype=torch.float32, device=device) # f32[20]
+  c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
   res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), additional_inputs=(a, b, c))
   return res
 
@@ -104,7 +105,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
   
   for additional_shape in additional_shapes:
     p = xb.mkparam(builder, len(params), additional_shape)
-    params.append(p)
+    params.insert(-1, p) # keep the last item is s32[10]
 
   # generate cond_fn xlacomputation
   cond_result = cond_fn(*fake_carried_inputs, a=additional_inputs[0],
