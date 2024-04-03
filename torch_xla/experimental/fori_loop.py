@@ -56,7 +56,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   a = torch.ones(1, dtype=torch.int32, device=device) # s32[1]
   b = torch.ones(20, dtype=torch.float32, device=device) # f32[20]
   c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, a, b, c)) # , additional_inputs=(a, b, c))
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, a, b, c, *input_value)) # , additional_inputs=(a, b, c))
   return res
 
 
@@ -81,7 +81,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
     #TODO(@manfei) type = carried_input.type
     fake_carried_inputs.append(
         torch.randint(10, carried_input.size(),
-                      dtype=carried_input.type()).to(device))
+                      dtype=int32).to(device))
   fake_carried_inputs = tuple(fake_carried_inputs)
   print("fake_carried_inputs: ", fake_carried_inputs)
   print("additional_inputs: ", additional_inputs)
