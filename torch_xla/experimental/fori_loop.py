@@ -100,7 +100,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   # tmp_params = params
   # (s32[1], s32[1], s32[1], s32[10], s32[1], /*index=5*/s32[20], s32[20,10]) 
   # params = params[:-4]+
-  import pdb; pdb.set_trace()
+  # import pdb; pdb.set_trace()
   params += [params.pop(-1)]
   print("params: ", params)
   # add additional_inputs for init of xla::while
