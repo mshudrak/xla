@@ -45,11 +45,13 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     else:
       return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     # ---
-
     # return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     return return_list
 
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value))
+  a = torch.tensor(1, dtype=torch.int32, device=device)
+  b = torch.tensor(1, dtype=torch.int32, device=device)
+  c = torch.tensor(1, dtype=torch.int32, device=device)
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), (a, b, c))
   return res
 
 
@@ -92,7 +94,10 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
   cond_result = cond_fn(*fake_carried_inputs)
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
-  cond_ctx.buildforiloop([cond_result], list(fake_carried_inputs[2:]))
+  additional_inputs_list = list(fake_carried_inputs[2:])
+  for i in range(len(additional_inputs)):
+    additional_inputs_list.append(additional_inputs[0])
+  cond_ctx.buildforiloop([cond_result], additional_inputs_list) # list(fake_carried_inputs[2:]), )
   cond_hlo = cond_ctx.hlo()
   cond_computation = xb.computation_from_module_proto("condcomputation",
                                                       cond_hlo)
