@@ -113,7 +113,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
 
   # generate cond_fn xlacomputation
-  cond_result = cond_fn(*fake_carried_inputs) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
+  cond_result = cond_fn(*fake_carried_inputs[:-3], fake_carried_inputs[-3], fake_carried_inputs[-2], fake_carried_inputs[-1]) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
   additional_inputs_list = list(fake_carried_inputs[2:])
