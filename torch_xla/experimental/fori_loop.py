@@ -55,7 +55,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   a = torch.tensor(1, dtype=torch.int32, device=device)
   b = torch.tensor(1, dtype=torch.int32, device=device)
   c = torch.tensor(1, dtype=torch.int32, device=device)
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), [a, b, c])
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), additional_inputs=(a, b, c))
   return res
 
 
