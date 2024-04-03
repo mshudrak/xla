@@ -52,9 +52,9 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     # return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     return return_list
 
-  a = torch.tensor(1, dtype=torch.int32, device=device)
-  b = torch.tensor(1, dtype=torch.int32, device=device)
-  c = torch.tensor(1, dtype=torch.int32, device=device)
+  a = torch.ones(1, dtype=torch.int32, device=device)
+  b = torch.ones(1, dtype=torch.int32, device=device)
+  c = torch.ones(1, dtype=torch.int32, device=device)
   res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value), additional_inputs=(a, b, c))
   return res
 
@@ -101,8 +101,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs):
     additional_shapes = xb.tensor_shape(additional_inputs)
   else:
     additional_shapes = xb.tensor_shape((additional_inputs))
-  # builder = xb.create_builder('test_while')
-  # params = []
+  
   for additional_shape in additional_shapes:
     p = xb.mkparam(builder, len(params), additional_shape)
     params.append(p)
