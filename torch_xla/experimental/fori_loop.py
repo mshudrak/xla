@@ -88,10 +88,10 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
   # trans fake_carried_inputs from list(tensor) to list(xla::op), which part could change init of xla::while
   kwargs = {}
-  if type(fake_carried_inputs) is tuple:
-    shapes = xb.tensor_shape(fake_carried_inputs)
+  if type(carried_inputs) is tuple:
+    shapes = xb.tensor_shape(carried_inputs)
   else:
-    shapes = xb.tensor_shape((fake_carried_inputs))
+    shapes = xb.tensor_shape((carried_inputs))
   builder = xb.create_builder('test_while')
   params = []
   for shape in shapes:
