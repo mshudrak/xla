@@ -96,7 +96,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   params = []
   for shape in shapes:
     p = xb.mkparam(builder, len(params), shape)
-    params.insert(p)
+    params.append(p)
   # tmp_params = params
   # (s32[1], s32[1], s32[1], s32[10], s32[1], /*index=5*/s32[20], s32[20,10]) 
   # params = params[:-4]+
