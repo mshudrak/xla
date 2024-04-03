@@ -28,12 +28,18 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     result = body_fun(one_value, x, *input_value)
     if type(result) is tuple:
       return_list = list(body_fun(one_value, x, *input_value))
-      return_list.insert(0, lower)
-      return_list.insert(0, torch.sub(upper, one_value))
+      # [body_fun_result]
+      return_list.insert(0, lower) # lower
+      # [lower, body_fun_result]
+      return_list.insert(0, torch.sub(upper, one_value)) # upper
+      # [upper, lower, body_fun_result]
       weight = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
-      return_list.append(weight)
-      final_one = torch.tensor(1, dtype=torch.int64, device=device) # s64[]
-      return_list.append(final_one)
+      # return_list.append(weight)
+      return_list.insert(-1, weight)
+      # [upper, lower, body_fun_result, weight]
+      # final_one = torch.tensor(1, dtype=torch.int64, device=device) # s64[]
+      # return_list.append(final_one)
+      # [upper, lower, body_fun_result, weight, final_one]
     else:
       return torch.sub(upper, one_value), lower, body_fun(one_value, x, input_value)
     # ---
