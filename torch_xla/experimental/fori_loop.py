@@ -34,15 +34,19 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
       return_list = list(body_fun(one_value, x, *input_value))
       # hard-code change body xlacomputation to meet requirement
       # [body_fun_result]
-      return_list.insert(0, lower) # lower
+      return_list.insert(1, lower) # lower
       # [lower, body_fun_result]
-      return_list.insert(0, torch.sub(upper, one_value)) # upper
+      return_list.insert(1, torch.sub(upper, one_value)) # upper
       # [upper, lower, body_fun_result]
+      # TODO(@manfei): should initialize bias with torch.nn.linear's real bias, currently we use placeholder for all bias are 1
+      bias = torch.ones([20], dtype=torch.float32, device=device) # f32[10]
+      return_list.insert(-1, bias)
+      # TODO(@manfei): should initialize weight with torch.nn.linear's real weight, currently we use placeholder for all weight are 1
       weight = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
       # return_list.append(weight)
-      return_list.append(weight)
-      final_one = torch.ones([10], dtype=torch.float32, device=device) # f32[10]
-      return_list.append(final_one)
+      return_list.insert(-1, weight)
+      l_in_i_plus_1 = torch.ones([10], dtype=torch.float32, device=device) # f32[10]
+      return_list.insert(-1, l_in_i_plus_1)
       # [upper, lower, body_fun_result, weight]
       # final_one = torch.tensor(1, dtype=torch.int64, device=device) # s64[]
       # return_list.append(final_one)
@@ -136,9 +140,9 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   cond_hlo = cond_ctx.hlo()
   cond_computation = xb.computation_from_module_proto("condcomputation",
                                                       cond_hlo)
-  # cond_hlo_print = xb.get_computation_hlo(cond_computation)
-  # print("cond computation: !!!!!!!!!")
-  # print(cond_hlo_print)
+  cond_hlo_print = xb.get_computation_hlo(cond_computation)
+  print("cond computation: !!!!!!!!!")
+  print(cond_hlo_print)
 
   # generate body_fn xlacomputation
   # body_result = body_fn(*fake_carried_inputs) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
@@ -149,9 +153,9 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   body_hlo = body_ctx.hlo()
   body_computation = xb.computation_from_module_proto("bodycomputation",
                                                       body_hlo)
-  # body_hlo_print = xb.get_computation_hlo(body_computation)
-  # print("body computation: !!!!!!!!!")
-  # print(body_hlo_print)
+  body_hlo_print = xb.get_computation_hlo(body_computation)
+  print("body computation: !!!!!!!!!")
+  print(body_hlo_print)
 
   # reorder carried_inputs to meet generated xlacomputation
   tmp_carried_inputs_list = list(carried_inputs)
@@ -187,9 +191,9 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
       body_computation=body_computation)
   name = 'fori_loop_ed_torch_func'
   computation = w.build(name)
-  # hlo_print = xb.get_computation_hlo(computation)
-  # print("while computation: !!!!!!!!!")
-  # print(hlo_print)
+  hlo_print = xb.get_computation_hlo(computation)
+  print("while computation: !!!!!!!!!")
+  print(hlo_print)
 
   # gain final result with generated while xlacomputation
   result = torch_xla._XLAC._xla_user_computation('xla::_op_test_while',
