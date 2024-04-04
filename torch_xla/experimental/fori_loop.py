@@ -26,15 +26,15 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
 
   # one_value, init_val, l_in_i
   def body_fn(upper, lower, x, *input_value, a, b, c, output_value):
-    # one_value = torch.ones(1, dtype=torch.int32, device=device)
+    # init_one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
     result = () # body_fun(one_value, x, *input_value)
     if type(result) is tuple:
       # one_value, torch.add(one_value, init_val), l_out
       # return_list = list(body_fun(one_value, x, *input_value))
-      one_value, torch_add_res, l_out = body_fun(one_value, x, *input_value)
-      return_list = list(one_value)
+      one_value_new, torch_add_res, l_out = body_fun(one_value, x, *input_value)
+      return_list = list(one_value_new)
       # hard-code change body xlacomputation to meet requirement
       # [body_fun_result]
       # return_list.insert(1, lower) # lower
