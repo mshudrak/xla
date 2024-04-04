@@ -32,6 +32,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     result = body_fun(one_value, x, *input_value)
     if type(result) is tuple:
       return_list = list(body_fun(one_value, x, *input_value))
+      # hard-code change body xlacomputation to meet requirement
       # [body_fun_result]
       return_list.insert(0, lower) # lower
       # [lower, body_fun_result]
