@@ -21,32 +21,42 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   # b = torch.tensor(1, dtype=torch.int32, device=device)
   # c = torch.tensor(1, dtype=torch.int32, device=device)
 
-  def cond_fn(upper, lower, x, *input_value, output_value, a, b, c):
+  def cond_fn(upper, lower, x, *input_value, a, b, c, output_value):
     return lower[0] < upper[0]
 
   # one_value, init_val, l_in_i
-  def body_fn(upper, lower, x, *input_value, output_value, a, b, c):
+  def body_fn(upper, lower, x, *input_value, a, b, c, output_value):
     # one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
     result = body_fun(one_value, x, *input_value)
     if type(result) is tuple:
-      return_list = list(body_fun(one_value, x, *input_value))
+      # one_value, torch.add(one_value, init_val), l_out
+      # return_list = list(body_fun(one_value, x, *input_value))
+      one_value, torch_add_res, l_out = body_fun(one_value, x, *input_value)
+      return_list = list(one_value)
       # hard-code change body xlacomputation to meet requirement
       # [body_fun_result]
-      return_list.insert(1, lower) # lower
+      # return_list.insert(1, lower) # lower
+      return_list.append(lower) # lower
       # [lower, body_fun_result]
-      return_list.insert(1, torch.sub(upper, one_value)) # upper
+      # return_list.insert(1, torch.sub(upper, one_value)) # upper
+      return_list.append(torch.sub(upper, one_value)) # upper
+      return_list.append(torch_add_res)
       # [upper, lower, body_fun_result]
       # TODO(@manfei): should initialize bias with torch.nn.linear's real bias, currently we use placeholder for all bias are 1
       bias = torch.ones([20], dtype=torch.float32, device=device) # f32[10]
-      return_list.insert(-1, bias)
+      # return_list.insert(-1, bias)
+      return_list.append(bias)
       # TODO(@manfei): should initialize weight with torch.nn.linear's real weight, currently we use placeholder for all weight are 1
       weight = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
       # return_list.append(weight)
-      return_list.insert(-1, weight)
+      # return_list.insert(-1, weight)
+      return_list.append(weight)
       l_in_i_plus_1 = torch.ones([10], dtype=torch.float32, device=device) # f32[10]
-      return_list.insert(-1, l_in_i_plus_1)
+      # return_list.insert(-1, l_in_i_plus_1)
+      return_list.append(l_in_i_plus_1)
+      return_list.append(l_out)
       # [upper, lower, body_fun_result, weight]
       # final_one = torch.tensor(1, dtype=torch.int64, device=device) # s64[]
       # return_list.append(final_one)
@@ -62,7 +72,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   b = torch.ones(20, dtype=torch.float32, device=device) # f32[20]
   c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
   output_value = torch.ones([20], dtype=torch.float32, device=device) # f32[20]
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, output_value, a, b, c)) # , additional_inputs=(a, b, c))
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, a, b, c, output_value)) # , additional_inputs=(a, b, c))
   return res
 
 
@@ -131,7 +141,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
   # generate cond_fn xlacomputation
   # TODO(@manfei): specify which element is for which argument like a,b,c
-  cond_result = cond_fn(*fake_carried_inputs[:-4], output_value=fake_carried_inputs[-4], a=fake_carried_inputs[-3], b=fake_carried_inputs[-2], c=fake_carried_inputs[-1]) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
+  cond_result = cond_fn(*fake_carried_inputs[:-4], a=fake_carried_inputs[-4], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1]) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
   additional_inputs_list = list(fake_carried_inputs[2:])
@@ -147,7 +157,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
   # generate body_fn xlacomputation
   # body_result = body_fn(*fake_carried_inputs) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
-  body_result = body_fn(*fake_carried_inputs[:-4], output_value=fake_carried_inputs[-4], a=fake_carried_inputs[-3], b=fake_carried_inputs[-2], c=fake_carried_inputs[-1])
+  body_result = body_fn(*fake_carried_inputs[:-4], a=fake_carried_inputs[-4], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
   body_ctx = torch_xla._XLAC.lowering.LoweringContext()
   body_ctx.set_name_string("bodyctx")
   body_ctx.buildforiloop(list(body_result), [])
