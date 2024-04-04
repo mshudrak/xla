@@ -29,7 +29,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     # one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
-    result = body_fun(one_value, x, *input_value)
+    result = () # body_fun(one_value, x, *input_value)
     if type(result) is tuple:
       # one_value, torch.add(one_value, init_val), l_out
       # return_list = list(body_fun(one_value, x, *input_value))
