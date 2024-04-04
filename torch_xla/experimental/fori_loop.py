@@ -40,7 +40,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
       weight = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
       # return_list.append(weight)
       return_list.append(weight)
-      final_one = torch.ones([10], dtype=torch.int32, device=device)
+      final_one = torch.ones([10], dtype=torch.float32, device=device) # f32[10]
       return_list.append(final_one)
       # [upper, lower, body_fun_result, weight]
       # final_one = torch.tensor(1, dtype=torch.int64, device=device) # s64[]
