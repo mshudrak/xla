@@ -152,6 +152,8 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
   # reorder carried_inputs to meet generated xlacomputation
   tmp_carried_inputs = carried_inputs
+  print("carried_inputs: ", carried_inputs)
+  print("tmp_carried_inputs: ", tmp_carried_inputs)
   carried_inputs = tmp_carried_inputs[:3] + tmp_carried_inputs[-3:] + tmp_carried_inputs[3]
 
   # trans fake_carried_inputs from list(tensor) to list(xla::op), which part could change init of xla::while
