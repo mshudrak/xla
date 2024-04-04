@@ -21,11 +21,11 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   # b = torch.tensor(1, dtype=torch.int32, device=device)
   # c = torch.tensor(1, dtype=torch.int32, device=device)
 
-  def cond_fn(upper, lower, x, *input_value, a, b, c):
+  def cond_fn(upper, lower, x, *input_value, output_value, a, b, c):
     return lower[0] < upper[0]
 
   # one_value, init_val, l_in_i
-  def body_fn(upper, lower, x, *input_value, a, b, c):
+  def body_fn(upper, lower, x, *input_value, output_value, a, b, c):
     # one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
@@ -61,7 +61,8 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   a = torch.ones(1, dtype=torch.int32, device=device) # s32[1]
   b = torch.ones(20, dtype=torch.float32, device=device) # f32[20]
   c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
-  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, a, b, c)) # , additional_inputs=(a, b, c))
+  output_value = torch.ones([20], dtype=torch.float32, device=device) # f32[20]
+  res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, output_value, a, b, c)) # , additional_inputs=(a, b, c))
   return res
 
 

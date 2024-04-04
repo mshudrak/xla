@@ -934,7 +934,7 @@ class PyLoweringContext {
       // parameters_number_i = parameters_number_i + 1;
       xla::Shape shape1 = xla::ShapeUtil::MakeShape(xla::PrimitiveType::F32, {20});
       xla::XlaOp x1 = xla::Parameter(local_builder, parameters_number_i, shape1,
-                                      "OutPutTensor");
+                                      "BiasTensor");
       parameters_number_i = parameters_number_i + 1;
       xla::Shape shape2 = xla::ShapeUtil::MakeShape(xla::PrimitiveType::F32, {20, 10});
       xla::XlaOp x2 = xla::Parameter(local_builder, parameters_number_i, shape2,
@@ -942,7 +942,11 @@ class PyLoweringContext {
       parameters_number_i = parameters_number_i + 1;
       xla::Shape shape3 = xla::ShapeUtil::MakeShape(xla::PrimitiveType::F32, {10});
       xla::XlaOp x3 = xla::Parameter(local_builder, parameters_number_i, shape3,
-                                      "FinalOneTensor");
+                                      "LInITensor");
+      parameters_number_i = parameters_number_i + 1;
+      xla::Shape shape4 = xla::ShapeUtil::MakeShape(xla::PrimitiveType::F32, {20});
+      xla::XlaOp x4 = xla::Parameter(local_builder, parameters_number_i, shape4,
+                                      "LOutTensor");
     }
 
     // Get the backing XLA tensors from the output torch tensor handles
