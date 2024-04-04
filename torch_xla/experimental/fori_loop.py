@@ -86,17 +86,18 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   print("fake_carried_inputs: ", fake_carried_inputs)
   print("additional_inputs: ", additional_inputs)
 
-  # trans fake_carried_inputs from list(tensor) to list(xla::op), which part could change init of xla::while
-  kwargs = {}
-  if type(carried_inputs) is tuple:
-    shapes = xb.tensor_shape(carried_inputs)
-  else:
-    shapes = xb.tensor_shape((carried_inputs))
-  builder = xb.create_builder('test_while')
-  params = []
-  for shape in shapes:
-    p = xb.mkparam(builder, len(params), shape)
-    params.append(p)
+  # # trans fake_carried_inputs from list(tensor) to list(xla::op), which part could change init of xla::while
+  # kwargs = {}
+  # if type(carried_inputs) is tuple:
+  #   shapes = xb.tensor_shape(carried_inputs)
+  # else:
+  #   shapes = xb.tensor_shape((carried_inputs))
+  # builder = xb.create_builder('test_while')
+  # params = []
+  # for shape in shapes:
+  #   p = xb.mkparam(builder, len(params), shape)
+  #   params.append(p)
+
   # tmp_params = params
   # (s32[1], s32[1], s32[1], s32[10], s32[1], /*index=5*/s32[20], s32[20,10]) 
   # params = params[:-4]+
@@ -148,6 +149,22 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   body_hlo_print = xb.get_computation_hlo(body_computation)
   print("body computation: !!!!!!!!!")
   print(body_hlo_print)
+
+  # reorder carried_inputs to meet generated xlacomputation
+  tmp_carried_inputs = carried_inputs
+  carried_inputs = tmp_carried_inputs[:3] + tmp_carried_inputs[-3:] + tmp_carried_inputs[3]
+
+  # trans fake_carried_inputs from list(tensor) to list(xla::op), which part could change init of xla::while
+  kwargs = {}
+  if type(carried_inputs) is tuple:
+    shapes = xb.tensor_shape(carried_inputs)
+  else:
+    shapes = xb.tensor_shape((carried_inputs))
+  builder = xb.create_builder('test_while')
+  params = []
+  for shape in shapes:
+    p = xb.mkparam(builder, len(params), shape)
+    params.append(p)
 
   # generate while xlacomputation
   input_tuple = xb.Op.tuple(tuple(params))
