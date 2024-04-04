@@ -66,7 +66,11 @@ lower_, upper_, one_value_, add_res_, l_out_res_, weight_, final_one_= fori_loop
 
 print("lower_: ", lower_)
 print("upper_: ", upper_)
+print("one_value_: ", one_value_)
+print("add_res_: ", add_res_)
 print("l_out_res_: ", l_out_res_)
+print("weight_: ", weight_)
+print("final_one_: ", final_one_)
 
 # --- linear two ---
 # l_in_2 = torch.randn(10, device=xm.xla_device())
