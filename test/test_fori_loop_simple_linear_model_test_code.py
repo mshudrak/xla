@@ -64,7 +64,8 @@ print("test code, body_fun: ", body_fun)
 # (s32[1], s32[1], s32[1], s32[1], f32[20], /*index=5*/f32[20,10], f32[10])
 # lower_, upper_, one_value_, add_res_, l_out_res_, weight_, final_one_= fori_loop(upper, lower, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
 # lower_, upper_, one_value_, add_res_, l_out_res_, weight_, final_one_= fori_loop(lower, upper, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
-one_value_, upper_, lower_, add_res_x_, bias_, weight_, l_in_i_plus_1_, l_out_= fori_loop(upper, lower, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
+# one_value_, upper_, lower_, add_res_x_, bias_, weight_, l_in_i_plus_1_, l_out_= fori_loop(upper, lower, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
+one_value_, upper_, lower_, add_res_x_, bias_, weight_, l_in_i_plus_1_, l_out_= fori_loop(lower, upper, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
 #one_value, [upper],[lower],x,          [bias],[new_weight], [l_in_i+1], l_out
 
 print("one_value_: ", one_value_)
