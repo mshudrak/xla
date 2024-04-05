@@ -41,7 +41,8 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
       # one_value, torch.add(one_value, init_val), l_out
       # return_list = list(body_fun(one_value, x, *input_value))
       one_value_new, torch_add_res, l_out = body_fun(one_value, x, *input_value)
-      return_list = list(one_value_new)
+      return_list = []
+      return_list.append(one_value_new)
       # hard-code change body xlacomputation to meet requirement
       # [body_fun_result]
       # return_list.insert(1, lower) # lower
