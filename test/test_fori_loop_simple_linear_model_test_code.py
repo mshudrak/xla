@@ -62,17 +62,19 @@ print("test code, body_fun: ", body_fun)
 # out:
 # (upper, lower, !!!one_value, !!!torch.add_res, l_out, weight, final_one)
 # (s32[1], s32[1], s32[1], s32[1], f32[20], /*index=5*/f32[20,10], f32[10])
-lower_, upper_, one_value_, add_res_, l_out_res_, weight_, final_one_= fori_loop(upper, lower, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
+# lower_, upper_, one_value_, add_res_, l_out_res_, weight_, final_one_= fori_loop(upper, lower, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
 # lower_, upper_, one_value_, add_res_, l_out_res_, weight_, final_one_= fori_loop(lower, upper, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
+one_value_, upper_, lower_, add_res_x_, bias_, weight_, l_in_i_plus_1_, l_out_= fori_loop(upper, lower, body_fun, one_value, init_val, l_in_0) # , placeholder_func, placeholder_input) # , linear_0, l_in_0)
+#one_value, [upper],[lower],x,          [bias],[new_weight], [l_in_i+1], l_out
 
-
-print("lower_: ", lower_)
-print("upper_: ", upper_)
 print("one_value_: ", one_value_)
-print("add_res_: ", add_res_)
-print("l_out_res_: ", l_out_res_)
+print("upper_: ", upper_)
+print("lower_: ", lower_)
+print("add_res_x_: ", add_res_x_)
+print("bias_: ", bias_)
 print("weight_: ", weight_)
-print("final_one_: ", final_one_)
+print("l_in_i_plus_1_: ", l_in_i_plus_1_)
+print("l_out_: ", l_out_)
 
 # --- linear two ---
 # l_in_2 = torch.randn(10, device=xm.xla_device())
