@@ -205,7 +205,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   for shape in shapes:
     p = xb.mkparam(builder, len(params), shape)
     params.append(p)
-  import pdb; pdb.set_trace()
+  # import pdb; pdb.set_trace()
 
   # generate while xlacomputation
   input_tuple = xb.Op.tuple(tuple(params))
