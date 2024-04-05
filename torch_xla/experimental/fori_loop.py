@@ -26,6 +26,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
 
   # one_value, init_val, l_in_i
   def body_fn(upper, lower, x, *input_value, a, b, c, output_value):
+    # one_value, upper, lower, x_i, bias, weight, l_in_i
     # init_one_value = torch.ones(1, dtype=torch.int32, device=device)
     
     # ---
@@ -55,8 +56,9 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
       return_list.append(weight)
       l_in_i_plus_1 = torch.ones([10], dtype=torch.float32, device=device) # f32[10]
       # return_list.insert(-1, l_in_i_plus_1)
-      return_list.append(l_in_i_plus_1)
-      return_list.append(l_out)
+      return_list.append(l_in_i_plus_1) # f32[10]
+      return_list.append(l_out) # f32[20]
+      # return_list.append(l_out) # f32[20]
       # [upper, lower, body_fun_result, weight]
       # final_one = torch.tensor(1, dtype=torch.int64, device=device) # s64[]
       # return_list.append(final_one)
