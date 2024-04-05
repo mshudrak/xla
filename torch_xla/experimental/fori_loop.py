@@ -25,6 +25,12 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     return lower[0] < upper[0]
 
   # one_value, init_val, l_in_i
+  # a = torch.ones(1, dtype=torch.int32, device=device) # s32[1]
+  # b = torch.ones(20, dtype=torch.float32, device=device) # f32[20]
+  # c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
+  # output_value = torch.ones([20], dtype=torch.float32, device=device) # f32[20]
+  #           s32[1]
+  #   s32[1], s32[1], s32[1], s32[1], f32[20], f32[20,10], f32[10], f32[20])) 
   def body_fn(upper, lower, x, *input_value, a, b, c, output_value):
     # one_value, upper, lower, x_i, bias, weight, l_in_i
     # init_one_value = torch.ones(1, dtype=torch.int32, device=device)
@@ -196,6 +202,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   for shape in shapes:
     p = xb.mkparam(builder, len(params), shape)
     params.append(p)
+  import pdb; pdb.set_trace()
 
   # generate while xlacomputation
   input_tuple = xb.Op.tuple(tuple(params))
