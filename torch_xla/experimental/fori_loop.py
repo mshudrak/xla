@@ -60,11 +60,11 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
       # return_list.append(weight)
       # return_list.insert(-1, weight)
       return_list.append(weight)
-      return_list.append(l_out) # f32[20]
+      # return_list.append(l_out) # f32[20]
       l_in_i_plus_1 = torch.ones([10], dtype=torch.float32, device=device) # f32[10]
       # return_list.insert(-1, l_in_i_plus_1)
       return_list.append(l_in_i_plus_1) # f32[10]
-      # return_list.append(l_out) # f32[20]
+      return_list.append(l_out) # f32[20]
       # return_list.append(l_out) # f32[20]
       # [upper, lower, body_fun_result, weight]
       # final_one = torch.tensor(1, dtype=torch.int64, device=device) # s64[]
@@ -187,8 +187,11 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   # carried_inputs = tmp_carried_inputs[:3]
   # carried_inputs.append(tmp_carried_inputs[-3:])
   tmp_save = tmp_carried_inputs_list[3]
+  tmp_save2 = tmp_carried_inputs_list[-1]
   del tmp_carried_inputs_list[3]
+  del tmp_carried_inputs_list[-1]
   tmp_carried_inputs_list.append(tmp_save)
+  tmp_carried_inputs_list.append(tmp_save2)
   carried_inputs = tuple(tmp_carried_inputs_list)
 
   # trans fake_carried_inputs from list(tensor) to list(xla::op), which part could change init of xla::while
