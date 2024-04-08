@@ -33,9 +33,12 @@ std::shared_ptr<ComputationClient::Computation> ComputationClient::Compile(
 std::vector<std::string> ComputationClient::GetCompilationDevices(
     const std::string& device, absl::Span<const std::string> devices) {
   std::vector<std::string> compilation_devices;
+
   if (devices.empty()) {
     auto replication_devices = GetReplicationDevices();
+    std::cout << "here" << std::endl;
     if (replication_devices == nullptr || replication_devices->empty()) {
+      std::cout << "ii: " << device << std::endl;
       compilation_devices.push_back(device);
     } else {
       compilation_devices = *replication_devices;

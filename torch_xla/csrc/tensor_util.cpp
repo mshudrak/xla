@@ -477,9 +477,15 @@ torch::lazy::BackendDataPtr TensorToXlaData(
                                            nullptr);
   }
 
+  std::cout << "device to string: " << device.toString() << std::endl;
   std::vector<std::shared_ptr<const runtime::TensorSource>> source_tensors;
+  std::string device_str = device.toString();
+  if (static_cast<XlaDeviceType>(device.type()) == XlaDeviceType::AOT) {
+    device_str = "aot";
+    std::cout << "print ait" << std::endl;
+  }
   source_tensors.push_back(
-      std::make_shared<runtime::AtenSource>(tensor, shape, device.toString()));
+      std::make_shared<runtime::AtenSource>(tensor, shape, device_str));
 
   auto handles =
       runtime::GetComputationClient()->TransferToDevice(source_tensors);

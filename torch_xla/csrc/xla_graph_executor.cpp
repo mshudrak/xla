@@ -1,6 +1,7 @@
 #include "torch_xla/csrc/xla_graph_executor.h"
 
 #include <Python.h>
+#include <signal.h>
 #include <torch/csrc/autograd/variable.h>
 #include <torch/csrc/lazy/core/hash.h>
 #include <torch/csrc/lazy/core/helpers.h>
@@ -87,8 +88,9 @@ XLAGraphExecutor::ComputationCache* CreateComputationCache() {
     auto serialize_fn =
         [](XLAGraphExecutor::ComputationCache::TypePtr computation)
         -> std::string {
-      return runtime::GetComputationClient()->SerializeComputation(
-          computation->computation);
+      return runtime::GetComputationClient()
+          ->SerializeComputation(  // PIZ: error
+              computation->computation);
     };
     auto deserialize_fn = [](std::string serialization)
         -> XLAGraphExecutor::ComputationCache::TypePtr {
@@ -103,6 +105,7 @@ XLAGraphExecutor::ComputationCache* CreateComputationCache() {
         kMaxCacheSize, persistentCacheDir, readonlyPersistentCache,
         serialize_fn, deserialize_fn);
   }
+  std::cout << "PIZ: return memory cache" << std::endl;
   return new XLAGraphExecutor::MemoryCache(kMaxCacheSize);
 }
 
@@ -597,8 +600,16 @@ XLAGraphExecutor::SyncTensorCollection XLAGraphExecutor::CollectSyncTensors(
   tsl::profiler::TraceMe activity("CollectSyncTensors",
                                   tsl::profiler::TraceMeLevel::kInfo);
   torch::lazy::Unique<torch::lazy::BackendDevice> unique_device;
+  // static const std::string fakeDevice =
+  //     runtime::sys_util::GetEnvString("XLA_COMPILATION_FAKE_DEVICE", "xla");
+  std::shared_ptr<torch::lazy::BackendDeviceType> sptr =
+      std::make_shared<torch::lazy::BackendDeviceType>(
+          torch::lazy::BackendDeviceType((int8_t)at::kXLA));
+  std::cout << "PIZ: set to XLA device" << std::endl;
+  auto bk_device = torch::lazy::BackendDevice(std::move(sptr), 0);
   for (size_t i = 0; i < tensors.size(); ++i) {
-    unique_device.set(tensors[i]->GetDevice());
+    // unique_device.set(tensors[i]->GetDevice());
+    unique_device.set(bk_device);
   }
   SyncTensorCollection coll;
   if (!unique_device) {
@@ -1007,12 +1018,25 @@ void XLAGraphExecutor::ExtractIRAndPrepareXlaData_(
     XLATensorPtr& tensor = (*tensors)[index];
     torch::lazy::Value ir_value = tensor->CurrentIrValue();
     ir_values.push_back(ir_value);
-    const torch::lazy::BackendDevice& tensor_device = tensor->GetDevice();
+    // const torch::lazy::BackendDevice& tensor_device = tensor->GetDevice(); // PIZ: this will return Unknown0
+
+    
+    std::shared_ptr<torch::lazy::BackendDeviceType> sptr =
+    std::make_shared<torch::lazy::BackendDeviceType>(
+          torch_xla::DeviceType(XlaDeviceType::TPU));
+    std::cout << "spr: " << torch_xla::DeviceType(XlaDeviceType::TPU).toString() << std::endl;
+    std::cout << "PIZ: set to XLA 2 device" << std::endl;
+    auto tensor_device = torch::lazy::BackendDevice(std::move(sptr), 0);
+    std::cout << "tensor_device: " << tensor_device.toString() << std::endl;
+
+
+
+
     xla::Shape shape = MakeShapeWithDeviceLayout(
         tensor->shape(), static_cast<XlaDeviceType>(tensor_device.type()));
     torch::lazy::BackendDataPtr handle =
         runtime::GetComputationClient()->CreateDataPlaceholder(
-            tensor_device.toString(), std::move(shape));
+            "xla:0", std::move(shape));
 
     // If current IR is a device data, executing the graph will generate a new
     // Data with the same value. In this case we want to inherit the buffer
@@ -1022,7 +1046,6 @@ void XLAGraphExecutor::ExtractIRAndPrepareXlaData_(
       std::dynamic_pointer_cast<runtime::ComputationClient::Data>(handle)
           ->set_should_donate_buffer(true);
     }
-
     tensor_data_vec.push_back(handle);
     if (tensor->CurrentDataHandle() == nullptr && config.force_ltc_data) {
       tensor->AssignIrValue(torch::lazy::Value());
@@ -1274,6 +1297,7 @@ XLAGraphExecutor::CompilationResult XLAGraphExecutor::Compile(
     std::vector<XLATensorPtr>& tensors, absl::Span<const std::string> devices,
     const SyncTensorCollection& coll, PostOrderData* po_data,
     const std::vector<torch::lazy::Value>& ir_values) {
+  std::cout << "compile stage" << std::endl;
   tsl::profiler::TraceMe activity(
       [&] {
         return tsl::profiler::TraceMeEncode(
@@ -1301,6 +1325,7 @@ XLAGraphExecutor::CompilationResult XLAGraphExecutor::Compile(
 
   std::vector<size_t> buffer_donor_indices;
   // TODO(yeounoh) enable aliasing is disabled for partitioned computation,
+  // raise(SIGTRAP);
   // since the current aliasing compares the unpartitioned input and output
   // shapes which can lead to an incorrect aliasing pairs if sharded.
   if (enable_aliasing && !use_autosharding) {
@@ -1357,10 +1382,18 @@ XLAGraphExecutor::CompilationResult XLAGraphExecutor::Compile(
       program_shape.result(), static_cast<XlaDeviceType>(coll.device.type()));
 
   std::vector<runtime::ComputationClient::CompileInstance> instances;
-  instances.push_back({std::move(computation), coll.device.toString(),
-                       runtime::GetComputationClient()->GetCompilationDevices(
-                           coll.device.toString(), devices),
-                       &shape, should_wrap_parameter, is_sharded});
+  std::cout << "qqqqq: " << coll.device.toString() << std::endl;
+  // for (auto de : runtime::GetComputationClient()->GetCompilationDevices(
+  //          coll.device.toString(), devices)) {
+  for (auto de : runtime::GetComputationClient()->GetCompilationDevices(
+           "aot:0", devices)) {
+    std::cout << "ddddd: " << de << std::endl;
+  }
+
+  instances.push_back(
+      {std::move(computation), coll.device.toString(),
+       runtime::GetComputationClient()->GetCompilationDevices("aot:0", devices),
+       &shape, should_wrap_parameter, is_sharded});
 
   if (use_autosharding) {
     TF_VLOG(5) << "use_auto_spmd_partitioning is set.";
@@ -1392,7 +1425,7 @@ XLAGraphExecutor::CompilationResult XLAGraphExecutor::Compile(
              << coll.device << " ...";
   std::vector<std::shared_ptr<runtime::ComputationClient::Computation>>
       computations =
-          runtime::GetComputationClient()->Compile(std::move(instances));
+          runtime::GetComputationClient()->Compile(std::move(instances)); // PIZ: place to generate compile result
   TF_VLOG(3) << "Compiling IR graph hash "
              << torch::lazy::HashToString(coll.hash) << " on device "
              << coll.device << " done!";
@@ -1499,7 +1532,7 @@ XLAGraphExecutor::SyncTensorsGraphInternal(
   TF_VLOG(5) << "TensorsGraphSize=" << compile_result.emitted_nodes;
   auto cached_computation = std::make_shared<CachedComputation>(
       std::move(compile_result.computation), compile_result.is_sharded);
-  GetComputationCache()->Add(coll.hash, cached_computation);
+  GetComputationCache()->Add(coll.hash, cached_computation);  // <- PIZ: error
 
   if (warm_up_cache_only) {
     return nullptr;

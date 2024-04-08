@@ -146,7 +146,10 @@ std::string SetCurrentThreadDevice(const std::string& device_str) {
 }
 
 std::string GetCurrentThreadDevice() {
-  return bridge::GetCurrentAtenDevice().str();
+  std::cout << "get_device" << std::endl;
+  auto dev = bridge::GetCurrentAtenDevice().str();
+  std::cout << "get_device done" << std::endl;
+  return dev;
 }
 
 std::vector<std::string> GetXlaDevices(
@@ -1646,6 +1649,15 @@ void InitXlaModuleBindings(py::module m) {
       py::arg("device") = "", py::arg("devices"), py::arg("wait") = true);
   m.def(
       "_xla_step_marker",
+      [](const std::string& device, const std::vector<std::string>& devices,
+         bool wait) {
+        NoGilSection nogil;
+        StepMarker(device, devices, wait);
+      },
+      py::arg("device") = "", py::arg("devices"), py::arg("wait") = true);
+  // PIZ: AOT compile only
+  m.def(
+      "_xla_aot_compile",
       [](const std::string& device, const std::vector<std::string>& devices,
          bool wait) {
         NoGilSection nogil;
