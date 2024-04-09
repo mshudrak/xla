@@ -22,7 +22,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   # c = torch.tensor(1, dtype=torch.int32, device=device)
 
   def cond_fn(upper, lower, x, *input_value, a, b, c, output_value):
-    return lower[0] < upper[0]
+    return lower[0] >= upper[0]
 
   # one_value, init_val, l_in_i
   # a = torch.ones(1, dtype=torch.int32, device=device) # s32[1]
