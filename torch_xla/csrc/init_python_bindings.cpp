@@ -949,6 +949,7 @@ class PyLoweringContext {
                                       "LOutTensor");
     }
 
+    // hard-code modify body xlacomputation input arguments
     if (GetNameString() == "bodyctx") {
       xla::XlaBuilder* local_builder = lowering_ctx.builder();
       int64_t parameters_number_i = 7;

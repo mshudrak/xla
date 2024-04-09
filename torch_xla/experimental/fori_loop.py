@@ -49,7 +49,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
       return_list.append(lower) # lower
       # [lower, body_fun_result]
       # return_list.insert(1, torch.sub(upper, one_value)) # upper
-      return_list.append(torch.sub(upper, one_value)) # upper
+      return_list.append(torch.sub(upper, one_value_new)) # one_value)) # upper
       return_list.append(torch_add_res)
       # [upper, lower, body_fun_result]
       # TODO(@manfei): should initialize bias with torch.nn.linear's real bias, currently we use placeholder for all bias are 1
@@ -78,9 +78,9 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     return return_list
 
   # s32[1], f32[20], /*index=5*/f32[20,10],
-  a = torch.ones(1, dtype=torch.int32, device=device) # s32[1]
-  b = torch.ones(20, dtype=torch.float32, device=device) # f32[20]
-  c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10]
+  a = torch.ones(1, dtype=torch.int32, device=device) # s32[1] # one_value?
+  b = torch.ones(20, dtype=torch.float32, device=device) # f32[20] # bias?
+  c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10] # weight?
   output_value = torch.ones([20], dtype=torch.float32, device=device) # f32[20]
   res = while_loop(cond_fn, body_fn, (lower, upper, init_val, *input_value, a, b, c, output_value)) # , additional_inputs=(a, b, c))
   return res
