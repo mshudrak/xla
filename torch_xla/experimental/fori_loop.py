@@ -201,7 +201,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
   # generate body_fn xlacomputation
   # body_result = body_fn(*fake_carried_inputs) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
-  body_result = body_fn(one_value=fake_carried_inputs[0], *fake_carried_inputs[1:-3], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
+  body_result = body_fn(*fake_carried_inputs[:-3], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
   body_ctx = torch_xla._XLAC.lowering.LoweringContext()
   body_ctx.set_name_string("bodyctx")
   body_ctx.buildforiloop(list(body_result), [])
