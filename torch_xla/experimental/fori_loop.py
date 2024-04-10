@@ -115,7 +115,7 @@ def fori_loop(one_value, lower, upper, body_fun, init_val, *input_value, weight_
   # b = torch.ones(20, dtype=torch.float32, device=device) # f32[20] # bias?
   # c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10] # weight?
   output_value = torch.ones([20], dtype=torch.float32, device=device) # f32[20]
-  res = while_loop(cond_fn, body_fn, (one_value, lower, upper, init_val, *input_value, bias_0, weight_0, output_value)) # , additional_inputs=(a, b, c))
+  res = while_loop(cond_fn, body_fn, (one_value, lower, upper, init_val, bias_0, *input_value, weight_0, output_value)) # , additional_inputs=(a, b, c))
   return res
 
 
@@ -185,7 +185,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   # generate cond_fn xlacomputation
   # TODO(@manfei): specify which element is for which argument like a,b,c
   # print("cond fake_carried_inputs[0]: ", fake_carried_inputs[0])
-  cond_result = cond_fn(*fake_carried_inputs[:-3], bias_0=fake_carried_inputs[-3], weight_0=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
+  cond_result = cond_fn(*fake_carried_inputs[:-2], weight_0=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
   additional_inputs_list = list(fake_carried_inputs[2:])
@@ -201,7 +201,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
   # generate body_fn xlacomputation
   # body_result = body_fn(*fake_carried_inputs) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
-  body_result = body_fn(*fake_carried_inputs[:-3], bias_0=fake_carried_inputs[-3], weight_0=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
+  body_result = body_fn(*fake_carried_inputs[:-2], weight_0=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
   body_ctx = torch_xla._XLAC.lowering.LoweringContext()
   body_ctx.set_name_string("bodyctx")
   body_ctx.buildforiloop(list(body_result), [])
