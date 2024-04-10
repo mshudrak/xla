@@ -111,7 +111,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
     return return_list
 
   # s32[1], f32[20], /*index=5*/f32[20,10],
-  a = torch.ones(1, dtype=torch.int32, device=device) # s32[1] # one_value? # ???
+  # a = torch.ones(1, dtype=torch.int32, device=device) # s32[1] # one_value? # ???
   b = torch.ones(20, dtype=torch.float32, device=device) # f32[20] # bias?
   c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10] # weight?
   output_value = torch.ones([20], dtype=torch.float32, device=device) # f32[20]

@@ -36,6 +36,8 @@ init_val = torch.tensor([1], dtype=torch.int32, device=device)
 #   # l_out = linear(l_in)
 #   return linear(l_in) # torch.add(a, b) # [0])
 linear_0 = torch.nn.Linear(10, 20).to(xm.xla_device())
+print("weight: ", linear_0.weight)
+print("bias: ", linear_0.bias)
 
 # def body_fun(one_value, init_val, l_in_i):
 #   # l_in = torch.randn(10, device=xm.xla_device())
