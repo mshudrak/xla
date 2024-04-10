@@ -949,14 +949,14 @@ class PyLoweringContext {
                                       "LOutTensor");
     }
 
-    // hard-code modify body xlacomputation input arguments
-    if (GetNameString() == "bodyctx") {
-      xla::XlaBuilder* local_builder = lowering_ctx.builder();
-      int64_t parameters_number_i = 7;
-      xla::Shape shape2 = xla::ShapeUtil::MakeShape(xla::PrimitiveType::F32, {20});
-      xla::XlaOp x2 = xla::Parameter(local_builder, parameters_number_i, shape2,
-                                      "WeightTensor");
-    }
+    // // hard-code modify body xlacomputation input arguments
+    // if (GetNameString() == "bodyctx") {
+    //   xla::XlaBuilder* local_builder = lowering_ctx.builder();
+    //   int64_t parameters_number_i = 7;
+    //   xla::Shape shape2 = xla::ShapeUtil::MakeShape(xla::PrimitiveType::F32, {20});
+    //   xla::XlaOp x2 = xla::Parameter(local_builder, parameters_number_i, shape2,
+    //                                   "WeightTensor");
+    // }
 
     // Get the backing XLA tensors from the output torch tensor handles
     std::vector<XLATensorPtr> xtensors =
