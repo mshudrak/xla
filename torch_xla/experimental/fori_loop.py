@@ -44,7 +44,7 @@ def fori_loop(one_value, lower, upper, body_fun, init_val, *input_value, weight_
   # b=fake_carried_inputs[-3],
   # c=fake_carried_inputs[-2],
   # output_value=fake_carried_inputs[-1]
-  def cond_fn(one_value, upper, lower, x, bias_0, weight_0, *input_value, output_value):
+  def cond_fn(one_value, lower, upper, x, bias_0, weight_0, *input_value, output_value):
     return lower[0] <= upper[0]
 
   # one_value, init_val, l_in_i
@@ -55,7 +55,7 @@ def fori_loop(one_value, lower, upper, body_fun, init_val, *input_value, weight_
   #           s32[1]
   #   s32[1], s32[1], s32[1], s32[1], f32[20], f32[20,10], f32[10], f32[20])) 
   # def body_fn(upper, lower, x, *input_value, a, b, c, output_value):
-  def body_fn(one_value, upper, lower, x, bias_0, weight_0, *input_value, output_value):
+  def body_fn(one_value, lower, upper, x, bias_0, weight_0, *input_value, output_value):
     # one_value, upper, lower, x_i, bias, weight, l_in_i
     # init_one_value = torch.ones(1, dtype=torch.int32, device=device)
     
