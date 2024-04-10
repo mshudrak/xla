@@ -21,6 +21,29 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   # b = torch.tensor(1, dtype=torch.int32, device=device)
   # c = torch.tensor(1, dtype=torch.int32, device=device)
 
+  # fake_carried_inputs:  (
+  #       /*one_value=*/
+  #       tensor([2], device='xla:0', dtype=torch.int32),
+  #       /*upper=*/
+  #       tensor([4], device='xla:0', dtype=torch.int32), 
+  #       /*lower=*/
+  #       tensor([7], device='xla:0', dtype=torch.int32), 
+  #       /*x=*/
+  #       tensor([9], device='xla:0', dtype=torch.int32), 
+  #       /*input_value=*/
+  #       tensor([1*10], device='xla:0'), 
+  #       /*b=*/
+  #       tensor([1*20], device='xla:0'),
+  #       /*c=*/
+  #       tensor(10*20, device='xla:0'),
+  #       /*output_value=*/ 
+  #       tensor([1*20], device='xla:0'))
+
+  # one_value=fake_carried_inputs[0], 
+  # *fake_carried_inputs[1:-3], 
+  # b=fake_carried_inputs[-3],
+  # c=fake_carried_inputs[-2],
+  # output_value=fake_carried_inputs[-1]
   def cond_fn(one_value, upper, lower, x, *input_value, b, c, output_value):
     return lower[0] <= upper[0]
 
@@ -162,7 +185,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
   # generate cond_fn xlacomputation
   # TODO(@manfei): specify which element is for which argument like a,b,c
   print("cond fake_carried_inputs[0]: ", fake_carried_inputs[0])
-  cond_result = cond_fn(one_value=fake_carried_inputs[0], *fake_carried_inputs[1:-3], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1]) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
+  cond_result = cond_fn(*fake_carried_inputs[1:-3], one_value=fake_carried_inputs[0], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1]) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
   additional_inputs_list = list(fake_carried_inputs[2:])
