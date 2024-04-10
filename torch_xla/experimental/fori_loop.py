@@ -44,7 +44,7 @@ def fori_loop(one_value, lower, upper, body_fun, init_val, *input_value, weight_
   # b=fake_carried_inputs[-3],
   # c=fake_carried_inputs[-2],
   # output_value=fake_carried_inputs[-1]
-  def cond_fn(one_value, lower, upper, x, bias_0, weight_0, *input_value, output_value):
+  def cond_fn(lower, upper, one_value, x, bias_0, weight_0, *input_value, output_value):
     return lower[0] <= upper[0]
 
   # one_value, init_val, l_in_i
@@ -84,11 +84,13 @@ def fori_loop(one_value, lower, upper, body_fun, init_val, *input_value, weight_
       return_list.append(torch_add_res)
       # [upper, lower, body_fun_result]
       # TODO(@manfei): should initialize bias with torch.nn.linear's real bias, currently we use placeholder for all bias are 1
-      bias = torch.ones([20], dtype=torch.float32, device=device) # f32[10] #???
+      # bias = torch.ones([20], dtype=torch.float32, device=device) # f32[10] #???
+      bias = bias_0
       # return_list.insert(-1, bias)
       return_list.append(bias)
       # TODO(@manfei): should initialize weight with torch.nn.linear's real weight, currently we use placeholder for all weight are 1
-      weight = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10] # ???
+      # weight = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10] # ???
+      weight = weight_0
       # return_list.append(weight)
       # return_list.insert(-1, weight)
       return_list.append(weight)
