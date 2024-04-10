@@ -92,7 +92,7 @@ def fori_loop(lower, upper, body_fun, one_value, init_val, *input_value):
   b = torch.ones(20, dtype=torch.float32, device=device) # f32[20] # bias?
   c = torch.ones([20, 10], dtype=torch.float32, device=device) # f32[20,10] # weight?
   output_value = torch.ones([20], dtype=torch.float32, device=device) # f32[20]
-  res = while_loop(cond_fn, body_fn, (a, lower, upper, init_val, *input_value, b, c, output_value)) # , additional_inputs=(a, b, c))
+  res = while_loop(cond_fn, body_fn, (one_value, lower, upper, init_val, *input_value, b, c, output_value)) # , additional_inputs=(a, b, c))
   return res
 
 
