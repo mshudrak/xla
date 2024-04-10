@@ -144,7 +144,7 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
         torch.randint(10, carried_input.size(),
                       dtype=carried_input.dtype).to(device))
   fake_carried_inputs = tuple(fake_carried_inputs)
-  print("fake_carried_inputs: ", fake_carried_inputs)
+  # print("fake_carried_inputs: ", fake_carried_inputs)
   # print("additional_inputs: ", additional_inputs)
 
   # # trans fake_carried_inputs from list(tensor) to list(xla::op), which part could change init of xla::while
@@ -184,8 +184,8 @@ def _xla_while_loop(cond_fn, body_fn, *carried_inputs, additional_inputs): # a, 
 
   # generate cond_fn xlacomputation
   # TODO(@manfei): specify which element is for which argument like a,b,c
-  print("cond fake_carried_inputs[0]: ", fake_carried_inputs[0])
-  cond_result = cond_fn(*fake_carried_inputs[1:-3], one_value=fake_carried_inputs[0], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1]) # , a=additional_inputs[0], b=additional_inputs[1], c=additional_inputs[2])
+  # print("cond fake_carried_inputs[0]: ", fake_carried_inputs[0])
+  cond_result = cond_fn(*fake_carried_inputs[:-3], b=fake_carried_inputs[-3], c=fake_carried_inputs[-2], output_value=fake_carried_inputs[-1])
   cond_ctx = torch_xla._XLAC.lowering.LoweringContext()
   cond_ctx.set_name_string("condctx")
   additional_inputs_list = list(fake_carried_inputs[2:])
